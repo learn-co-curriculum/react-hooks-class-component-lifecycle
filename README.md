@@ -3,7 +3,9 @@
 ## Overview
 
 In this lesson, we'll describe the phases, as well as the importance, of the
-React component lifecycle.
+React component lifecycle. We'll also talk about the similarities between
+component lifecycle in class components, and the `useEffect` hook in function
+components.
 
 ## Objectives
 
@@ -36,69 +38,67 @@ component gets **deleted**.
 It seems all pretty straightforward from the user's perspective, however as
 you'll soon find out, there's a lot of stuff going on behind the scenes.
 
-## Lifecycle Hooks and Rendering
+## Lifecycle Methods and Rendering
 
 In order to enable this quick reacting and updating, as a developer, you get
 access to certain built-in events in the React component lifecycle called
-**lifecycle hooks** or **lifecycle methods**. These are opportunities for you to
-change how the component reacts (or doesn't react) to various changes in your
-app.
+**lifecycle methods**. These are opportunities for you to change how the
+component reacts (or doesn't react) to various changes in your app.
 
-These methods are called *lifecycle* methods, because they are called at
-different times in the component's lifecycle - just before it's created, after
+These methods are called _lifecycle_ methods, because they are called at
+different times in the component's lifecycle -- just before it's created, after
 it's created, and when it's about to be deleted.
 
-The only required method for a React component to be valid is the `render()`
-method which describes what the HTML for the component looks like. There are a
-whole host of optional methods you can use if you need more control over how the
-component responds to change. The optional methods will be called if you include
-definitions for them in a component. Otherwise, React will follow its default
-behavior.
+The only required method for a React class component to be valid is the
+`render()` method, which describes what the HTML for the component looks like.
+There are a whole host of optional methods you can use if you need more control
+over how the component responds to change. The optional methods will be called
+if you include definitions for them in a component. Otherwise, React will follow
+its default behavior.
+
+There are more lifecycle methods than the ones described below; however, we'll
+be covering the most common ones. Check out the
+[React Docs](https://reactjs.org/docs/react-component.html#the-component-lifecycle)
+for a full list.
 
 ![Diagram](https://i1.wp.com/programmingwithmosh.com/wp-content/uploads/2018/10/Screen-Shot-2018-10-31-at-1.44.28-PM.png)
 
 ## Pre-mounting
 
-It is important to remember that components, at their core, are just JS classes.
-This means that even before mounting has begun, the class's `constructor`
-function is called.
+It is important to remember that class components, at their core, are just JS
+classes. This means that even before mounting has begun, the class's
+`constructor` function is called.
 
 While the `constructor` is not related to mounting to the DOM, it is the first
-function called upon the initialization of a component; this makes it useful for
-creating an initial state for a component.
+function called upon the initialization of a component.
+
+In older React code, you'll often encounter the `constructor` method when
+initializing state and binding methods, like this:
+
+```js
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    state = {
+      count: 0,
+    };
+    this.handleClick.bind(this);
+  }
+}
+```
+
+In newer React codebases, you are less likely to encounter the constructor
+method.
 
 ## Mounting
 
 When the component is initially created, it gets mounted onto the DOM. It sounds
 more complicated than it is: the component figures out its initial state and
-renders its initial JSX onto the page. At the mounting stage, there are two
-*lifecycle hooks* available to us: `static getDerivedStateFromProps`, and
-`componentDidMount`.
+renders its initial JSX onto the page. After the mounting stage, there is one
+commonly used _lifecycle method_ available to us: `componentDidMount`.
 
-After the `constructor` is called, `static getDerivedStateFromProps` will get
-called just _before_ `render`. This method gives us access to any props and
-state, and can modify and return state before a component is rendered. This
-method gets called every time a component renders, including the initial render
-and all subsequent re-renders of content. It is uncommon that we use this hook, though -
-even [the React documentation][derived] mentions that it exists for rare use
-cases. We want to prioritize rendering - adding logic that runs before every
-render can have an impact on a component's performance. It is more common that
-we want the component to render _first_ so a user sees something on the page
-as soon as possible. Once rendered, we can update state, handle complex logic,
-etc...
-
-In addition, it may seem useful to have access to both props and state and to
-compare them before rendering, but if you find yourself in need of this, its
-possible there is a better pattern. If you're comparing props from a parent to
-the state of a child, you can often avoid this by just putting the state _in the
-parent component_ and handle the comparison logic in the parent.
-
-Since the introduction of React 16, `static getDerivedStateFromProps` is the
-_only_ hook that fires before render() during mounting. Any code in this
-lifecycle method is extra code to run _before_ JSX is rendered to the DOM.
-
-After the `constructor` and `static getDerivedStateFromProps`, `render` is
-invoked, most often returning JSX so that React can insert it into the DOM.
+After the `constructor`, `render` is invoked, most often returning JSX so that
+React can insert it into the DOM.
 
 The `componentDidMount` method will get called just _after_ the `render` method.
 You would use this method to set up any long-running processes or asynchronous
@@ -106,53 +106,145 @@ processes such as fetching and updating data. It is better to render and display
 _something_ to your user even if all of your data isn't ready yet. Once it _is_
 ready, React can just re-render and use the API content.
 
+The `componentDidMount` lifecycle method is _roughly_ equivalent to using the
+`useEffect` hook in a function component with an empty dependencies array. In
+both cases, we have a place to run some code immediately after the component has
+been rendered to the DOM. Here's a quick side-by-side:
+
+```js
+// class component
+
+class ChatWindow extends React.Component {
+  // 1. constructor is callled (state is initialized)
+  constructor(props) {
+    super(props)
+    state = {
+      messages: []
+    }
+  }
+
+  // 3. componentDidMount is called (fetch some data)
+  componentDidMount() {
+    fetch("http://localhost:3000/messages")
+      .then(r => r.json())
+      .then(messages => this.setState({ messages }))
+  }
+
+  // 2. render is called (return JSX)
+  render() {
+    return (
+      // JSX
+    )
+  }
+}
+
+// function component
+
+// 1. function is called
+function App() {
+  const [messages, setMessages] = useState([])
+
+  useEffect(() => {
+    // 3. side effect function is called
+    fetch("http://localhost:3000/messages")
+      .then(r => r.json())
+      .then(messages => setMessages(messages))
+  }, [])
+
+  // 2. function returns JSX
+  return (
+    // JSX
+  )
+}
+```
+
 ## Updating
 
 Whenever a component's state or props are changed, it gets re-rendered on the
-page. That's the beauty of React components - they're quick to *react* to
+page. That's the beauty of React components - they're quick to _react_ to
 changes. A re-render could be triggered when a user interacts with the
 component, or if new data (props or state) is passed in.
 
 For example, going back to the chat window example, whenever you press "send" on
 a message, the `ChatWindow` component gets re-rendered as it needs to display an
-extra message. Whenever a re-render is triggered, there is a whole host of
-lifecycle hooks that get called. You can choose to use any of these to decide
-how your React component should respond to changes.
+extra message. Whenever a re-render is triggered, `render` is called, returning
+the JSX for React. React uses this JSX to figure out what to display on the
+page.
 
-The `static getDerivedStateFromProps()` is invoked before anything else when
-updating a component, and again, is available for rare situations where you may
-need to calculate state changes prior to an update.
-
-The `shouldComponentUpdate` method is invoked just before the component is about
-to re-render. At this stage, you can compare the old and new props and state and
-prevent unnecessary re-renders: if the changes in state and/or props don't
-actually alter the component that's being shown to the user, there is no point
-"repainting" it as it is an unnecessary performance drain.
-
-After the first two hooks, `render` is called, returning the JSX for React.
-React uses this JSX to figure out what to display on the page.
-
-_Just_ before updating, `getSnapshotBeforeUpdate` is invoked. The
-`getSnapshotBeforeUpdate` method returns a 'snapshot' that can be used in the
-final update lifecycle method, `componentDidUpdate`. This snapshot allows us to
-capture things like scroll position. This sort of value can possibly change in
-the small amount of time before `componentDidUpdate` is invoked.
-
-The `componentDidUpdate` method is called just after the component is rendered
-and updated. It is possible in `componentDidUpdate` to take some actions
-without triggering a re-render of the component, such as focusing on a specific
-form input.
+After render is called, the `componentDidUpdate` method is called just after the
+component is rendered and updated. It is possible in `componentDidUpdate` to
+take some actions without triggering a re-render of the component, such as
+focusing on a specific form input.
 
 You will have access to the previous props and state as well as the current
 ones, and you can use this method to update any third party libraries if they
 happen to need an update due to the re-render.
 
+Comparing to our hooks examples, `componentDidUpdate` can also be used in a
+similar way to `useEffect` to trigger side effects in response to changes to
+a component's state or props. Here's an example of two versions of a component
+with similar functionality to demonstrate:
+
+```js
+class ChatRoom extends React.Component {
+  // 1. constructor is called (using class field syntax, we don't need to write the constructor method)
+  state = {
+    messages: [],
+    roomId: 1,
+  };
+
+  // 3. componentDidMount is called
+  componentDidMount() {
+    fetch(`http://localhost:3000/rooms/${this.state.roomId}/messages`)
+      .then((r) => r.json())
+      .then((messages) => this.setState({ messages }));
+  }
+
+  // 5. when setState is called, componentDidUpdate runs after render
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.roomId !== this.state.roomId) {
+      fetch(`http://localhost:3000/rooms/${this.state.roomId}/messages`)
+        .then((r) => r.json())
+        .then((messages) => this.setState({ messages }));
+    }
+  }
+
+  // 2. render is called
+  // 4. render is called again after setting state in componentDidMount
+  render() {
+    return; // JSX
+  }
+}
+
+// 1. function is called
+// 4. function is called again after setting state in useEffect
+function ChatRoom() {
+  const [roomId, setRoomId] = useState(1);
+  const [messages, setMessages] = useState([]);
+
+  useEffect(() => {
+    // 3. useEffect callback is called after initial render
+    // 6. useEffect callback is called again if roomId changes
+    fetch(`http://localhost:3000/rooms/${roomId}/messages`)
+      .then((r) => r.json())
+      .then((messages) => setMessages(messages));
+  }, [roomId]);
+
+  // 2. function returns JSX
+  // 5. function returns JSX
+  return; // JSX
+}
+```
+
+As you can see, in the example above there is some duplication of the logic in
+the `componentDidMount` and `componentDidUpdate` functions -- this is one of the
+advantages of using `useEffect` instead.
+
 ## Unmounting
 
 At the unmounting stage, the component gets deleted and cleared out of the page.
 The only lifecycle hook at this stage is `componentWillUnmount`, which is called
-just before the component gets deleted. This is used to clear out any stuff set
-up in `componentDidMount`.
+just before the component gets removed. This is used to clean up after the component by removing timers, unsubscribing from connections, etc.
 
 For example, if you had a component that displays the weather data in your home
 town, you might have set it up to re-fetch the updated weather information every
@@ -160,12 +252,67 @@ town, you might have set it up to re-fetch the updated weather information every
 want to continue doing this data-fetching, so you'd have to get rid of what was
 set up in `componentWillUnmount`.
 
+The closest equivalent to `componentWillUnmount` in function components is the
+cleanup function that you can return from `useEffect`. They aren't _strictly_
+equivalent, because the cleanup function from `useEffect` will run between each
+render, and `componentWillUnmount` will only run when the component is removed.
+But they are both used in similar cases. For example:
+
+```js
+class Timer extends React.Component {
+  // 1. constructor is called
+  state = { count: 0 };
+
+  // 3. componentDidMount is called
+  componentDidMount() {
+    this.interval = setInterval(() => {
+      this.setState((prevState) => ({
+        count: prevState.count + 1,
+      }));
+    }, 1000);
+  }
+
+  // 5. componentWillUnmount is called after the component is removed (by the parent component)
+  componentWillUnmount() {
+    clearInterval(this.interval);
+  }
+
+  // 2. render is called
+  // 4. render is called again after setting state
+  render() {
+    return; // JSX
+  }
+}
+
+// 1. function is called
+// 4. function is called again after setting state
+function Timer() {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    // 3. useEffect callback runs (only once, since we gave an empty dependencies array)
+    const interval = setInterval(() => {
+      setCount((count) => count + 1);
+    }, 1000);
+
+    // 6. cleanup function is called after the component is removed (by the parent component)
+    return function () {
+      clearInterval(interval);
+    };
+  }, []);
+
+  // 2. function returns JSX
+  // 5. function returns JSX
+  return; // JSX
+}
+```
+
 ## Summary
 
 Imagine a big old oak tree. The tree could be a parent component, each of its
 branches a child component of the tree, each of its leaves a child component of
 the branch and so on. Each of the leaves go through a very obvious lifecycle of
-being created, changing based on state (changing colour based on the season,
+being created, changing based on state (changing color based on the season,
 withering if there's not enough nutrition being passed down from the parent
 branch, changing into a leaf with a hole bitten out of it if a caterpillar
 munches on it), and finally falling down when it's autumn.
@@ -173,46 +320,8 @@ munches on it), and finally falling down when it's autumn.
 So as it seems, if you need a lifecycle hook, there's sure to be one for your
 every need!
 
-#### Mounting lifecycle methods
-
-Called once on initial render:
-
-| Method            | current props and state | prevProps | prevState | nextProps |  nextState | Can call `this.setState` | Called when?               | Used for |                                                                                   
-|:-------------------------:|:---------:|:---------:|:----------------------:|:-------------------------------------------------------:|:--------------------------------------------------------------------------------:|:---------:|:---------:|:----------------------:|
-| `constructor` |     no    |     no    |     no    |     no    |     no    |     no    | once, just before `static getDerivedStateFromProps()` is called for the first time | Setting initial state                                             |
-| `static getDerivedStateFromProps()` |     yes    |     no    |     no    |     no    |     no    |     yes    | right before the initial render and **all** re-renders | Not used often |
-| `render()`           |     yes   |     no    |     no    |     no    |     no    |     no    | every time React updates and commits to the DOM | Writing JSX for components |
-| `componentDidMount`  |     yes   |     no    |     no    |     no    |     no    |     yes   | once, just after mounting  | setting up side effects (e.g. creating new DOM elements or setting up asynchronous functions |
-
-#### Updating lifecycle methods
-
-Not called on initial render, but always called whenever a subsequent re-render is triggered:
-
-| Method            | current props and state | prevProps | prevState | nextProps |  nextState | Can call `this.setState` | Called when?               | Used for                                                                                    |
-|:-------------------------:|:---------:|:---------:|:----------------------:|:-------------------------------------------------------:|:--------------------------------------------------------------------------------:|:---------:|:---------:|:----------------------:|
-| `static getDerivedStateFromProps()` |    yes    |     no    |     no    |     no    |     no    |     yes     |     before every render  |   Not used often |
-|   `shouldComponentUpdate`   |    yes    |    no    |    no    |    yes    |    yes   |    yes    | before every re-render (not initially) | can be used to stop unnecessary re-renders for performance optimization |
-|     `getSnapshotBeforeUpdate`    |    yes   |    yes   |    yes   |    no   |    no   |    yes   | just before React updates and commits new content to the DOM | used rarely; can capture data that may be changing rapidly |
-|     `componentDidUpdate`    |    yes   |    yes    |    yes    |    no   |    no    |    yes    | just after a re-render has finished | any DOM updates following a render (mostly interacting with 3rd party libraries) |
-
-Current props and state are always available through `this.props` and
-`this.state`. Some of these methods have access to previous props and state, or
-the next props and state. In these cases, the props and state are being passed
-into the method by React.
-
-#### Dismounting lifecycle method
-
-Called only once, just before the component is removed from the DOM:
-
-| Method            | current props and state | prevProps | prevState | nextProps |  nextState | Can call `this.setState` | Called when?               | Used for                                                                                    |
-|:--------------------:|:---------:|:---------:|:----------------------:|:---------------------------------------------------:|:-------------------------------------------------------:|:---------:|:---------:|:----------------------:|
-| `componentWillUnmount` | yes | no | no | no | no | n/a | once, just before component is removed from the DOM | destroying any side effects set up in componentDidMount |
-
-
-
 ## Resources
 
-- [React: Component Specs and Lifecycle](https://facebook.github.io/react/docs/component-specs.html)
+- [Component Lifecycle Methods](https://reactjs.org/docs/react-component.html#the-component-lifecycle)
+- [Component Lifecycle Diagram](https://projects.wojtekmaj.pl/react-lifecycle-methods-diagram/)
 - [Understanding the React Component Lifecycle](http://busypeoples.github.io/post/react-component-lifecycle/)
-
-[derived]: https://reactjs.org/docs/react-component.html#static-getderivedstatefromprops
