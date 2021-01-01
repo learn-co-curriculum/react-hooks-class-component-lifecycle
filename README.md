@@ -46,7 +46,7 @@ access to certain built-in events in the React component lifecycle called
 component reacts (or doesn't react) to various changes in your app.
 
 These methods are called _lifecycle_ methods, because they are called at
-different times in the component's lifecycle -- just before it's created, after
+different times in the component's lifecycle &mdash; just before it's created, after
 it's created, and when it's about to be deleted.
 
 The only required method for a React class component to be valid is the
@@ -92,13 +92,12 @@ method.
 
 ## Mounting
 
-When the component is initially created, it gets mounted onto the DOM. It sounds
-more complicated than it is: the component figures out its initial state and
-renders its initial JSX onto the page. After the mounting stage, there is one
-commonly used _lifecycle method_ available to us: `componentDidMount`.
+When the component is initially created, it gets mounted onto the DOM.
+"Mounting" for React means getting the component's JSX (whatever is returned by
+the `render` method), and creating DOM elements based on that JSX.
 
-After the `constructor`, `render` is invoked, most often returning JSX so that
-React can insert it into the DOM.
+After the mounting stage, there is one commonly used _lifecycle method_
+available to us: `componentDidMount`.
 
 The `componentDidMount` method will get called just _after_ the `render` method.
 You would use this method to set up any long-running processes or asynchronous
@@ -111,9 +110,30 @@ The `componentDidMount` lifecycle method is _roughly_ equivalent to using the
 both cases, we have a place to run some code immediately after the component has
 been rendered to the DOM. Here's a quick side-by-side:
 
-```js
-// class component
+- **Function Component**:
 
+```js
+// 1. function is called
+function ChatWindow() {
+  const [messages, setMessages] = useState([])
+
+  useEffect(() => {
+    // 3. side effect function is called
+    fetch("http://localhost:3000/messages")
+      .then(r => r.json())
+      .then(messages => setMessages(messages))
+  }, [])
+
+  // 2. function returns JSX
+  return (
+    // JSX
+  )
+}
+```
+
+- **Class Component**:
+
+```js
 class ChatWindow extends React.Component {
   // 1. constructor is callled (state is initialized)
   constructor(props) {
@@ -137,31 +157,12 @@ class ChatWindow extends React.Component {
     )
   }
 }
-
-// function component
-
-// 1. function is called
-function App() {
-  const [messages, setMessages] = useState([])
-
-  useEffect(() => {
-    // 3. side effect function is called
-    fetch("http://localhost:3000/messages")
-      .then(r => r.json())
-      .then(messages => setMessages(messages))
-  }, [])
-
-  // 2. function returns JSX
-  return (
-    // JSX
-  )
-}
 ```
 
 ## Updating
 
 Whenever a component's state or props are changed, it gets re-rendered on the
-page. That's the beauty of React components - they're quick to _react_ to
+page. That's the beauty of React components &mdash; they're quick to _react_ to
 changes. A re-render could be triggered when a user interacts with the
 component, or if new data (props or state) is passed in.
 
@@ -185,9 +186,35 @@ similar way to `useEffect` to trigger side effects in response to changes to
 a component's state or props. Here's an example of two versions of a component
 with similar functionality to demonstrate:
 
+- **Function Component**
+
+```js
+// 1. function is called
+// 4. function is called again after setting state in useEffect
+function ChatRoom() {
+  const [roomId, setRoomId] = useState(1);
+  const [messages, setMessages] = useState([]);
+
+  useEffect(() => {
+    // 3. useEffect callback is called after initial render
+    // 6. useEffect callback is called again if roomId changes
+    fetch(`http://localhost:3000/rooms/${roomId}/messages`)
+      .then((r) => r.json())
+      .then((messages) => setMessages(messages));
+  }, [roomId]);
+
+  // 2. function returns JSX
+  // 5. function returns JSX
+  return; // JSX
+}
+```
+
+- **Class Component**
+
 ```js
 class ChatRoom extends React.Component {
-  // 1. constructor is called (using class field syntax, we don't need to write the constructor method)
+  // 1. constructor is called
+  // (using class field syntax, we don't need to write the constructor method)
   state = {
     messages: [],
     roomId: 1,
@@ -215,36 +242,18 @@ class ChatRoom extends React.Component {
     return; // JSX
   }
 }
-
-// 1. function is called
-// 4. function is called again after setting state in useEffect
-function ChatRoom() {
-  const [roomId, setRoomId] = useState(1);
-  const [messages, setMessages] = useState([]);
-
-  useEffect(() => {
-    // 3. useEffect callback is called after initial render
-    // 6. useEffect callback is called again if roomId changes
-    fetch(`http://localhost:3000/rooms/${roomId}/messages`)
-      .then((r) => r.json())
-      .then((messages) => setMessages(messages));
-  }, [roomId]);
-
-  // 2. function returns JSX
-  // 5. function returns JSX
-  return; // JSX
-}
 ```
 
 As you can see, in the example above there is some duplication of the logic in
-the `componentDidMount` and `componentDidUpdate` functions -- this is one of the
-advantages of using `useEffect` instead.
+the `componentDidMount` and `componentDidUpdate` functions &mdash; this is one
+of the advantages of using `useEffect` instead.
 
 ## Unmounting
 
 At the unmounting stage, the component gets deleted and cleared out of the page.
 The only lifecycle hook at this stage is `componentWillUnmount`, which is called
-just before the component gets removed. This is used to clean up after the component by removing timers, unsubscribing from connections, etc.
+just before the component gets removed. This is used to clean up after the
+component by removing timers, unsubscribing from connections, etc.
 
 For example, if you had a component that displays the weather data in your home
 town, you might have set it up to re-fetch the updated weather information every
@@ -257,6 +266,34 @@ cleanup function that you can return from `useEffect`. They aren't _strictly_
 equivalent, because the cleanup function from `useEffect` will run between each
 render, and `componentWillUnmount` will only run when the component is removed.
 But they are both used in similar cases. For example:
+
+- **Function Component**
+
+```js
+// 1. function is called
+// 4. function is called again after setting state
+function Timer() {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    // 3. useEffect callback runs (only once, since we gave an empty dependencies array)
+    const interval = setInterval(() => {
+      setCount((count) => count + 1);
+    }, 1000);
+
+    // 6. cleanup function is called after the component is removed (by the parent component)
+    return function () {
+      clearInterval(interval);
+    };
+  }, []);
+
+  // 2. function returns JSX
+  // 5. function returns JSX
+  return; // JSX
+}
+```
+
+- **Class Component**
 
 ```js
 class Timer extends React.Component {
@@ -282,28 +319,6 @@ class Timer extends React.Component {
   render() {
     return; // JSX
   }
-}
-
-// 1. function is called
-// 4. function is called again after setting state
-function Timer() {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    // 3. useEffect callback runs (only once, since we gave an empty dependencies array)
-    const interval = setInterval(() => {
-      setCount((count) => count + 1);
-    }, 1000);
-
-    // 6. cleanup function is called after the component is removed (by the parent component)
-    return function () {
-      clearInterval(interval);
-    };
-  }, []);
-
-  // 2. function returns JSX
-  // 5. function returns JSX
-  return; // JSX
 }
 ```
 
