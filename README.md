@@ -1,18 +1,17 @@
 # React Component Lifecycle
 
+## Learning Goals
+
+- Describe the three phases of the React component lifecycle
+- Define lifecycle methods and how they enable the component to react to
+  different events
+
 ## Overview
 
 In this lesson, we'll describe the phases, as well as the importance, of the
 React component lifecycle. We'll also talk about the similarities between
 component lifecycle in class components, and the `useEffect` hook in function
 components.
-
-## Objectives
-
-1. Distinguish between props and states as they relate to React components
-2. Describe the three phases of the React component lifecycle
-3. Define lifecycle methods and how they enable the component to react to different events
-4. Define and describe various lifecycle methods
 
 ## Component Lifecycle
 
@@ -31,9 +30,9 @@ divided into three parts: **creation**, **updating**, and **deletion**.
 This means that every single thing you see in applications written in React is
 actually a React component and/or a part of one! For example, if you open a new
 chat window in a website written in React, a `ChatWindow` component is
-**created**. As you are interacting with it and sending messages to your friends -
-that's the **updating** part. And when you finally close the window, the React
-component gets **deleted**.
+**created**. As you are interacting with it and sending messages to your friends
+&mdash; that's the **updating** part. And when you finally close the window, the
+React component gets **deleted**.
 
 It seems all pretty straightforward from the user's perspective, however as
 you'll soon find out, there's a lot of stuff going on behind the scenes.
@@ -46,8 +45,8 @@ access to certain built-in events in the React component lifecycle called
 component reacts (or doesn't react) to various changes in your app.
 
 These methods are called _lifecycle_ methods, because they are called at
-different times in the component's lifecycle &mdash; just before it's created, after
-it's created, and when it's about to be deleted.
+different times in the component's lifecycle &mdash; just before it's created,
+after it's created, and when it's about to be deleted.
 
 The only required method for a React class component to be valid is the
 `render()` method, which describes what the HTML for the component looks like.
@@ -58,15 +57,14 @@ its default behavior.
 
 There are more lifecycle methods than the ones described below; however, we'll
 be covering the most common ones. Check out the
-[React Docs](https://reactjs.org/docs/react-component.html#the-component-lifecycle)
-for a full list.
+[React Docs][react component lifecycle] for a full list.
 
-![Diagram](https://i1.wp.com/programmingwithmosh.com/wp-content/uploads/2018/10/Screen-Shot-2018-10-31-at-1.44.28-PM.png)
+![Component Lifecycle Diagram](https://i1.wp.com/programmingwithmosh.com/wp-content/uploads/2018/10/Screen-Shot-2018-10-31-at-1.44.28-PM.png)
 
 ## Pre-mounting
 
-It is important to remember that class components, at their core, are just JS
-classes. This means that even before mounting has begun, the class's
+It is important to remember that class components, at their core, are just
+JavaScript classes. This means that even before mounting has begun, the class's
 `constructor` function is called.
 
 While the `constructor` is not related to mounting to the DOM, it is the first
@@ -182,8 +180,8 @@ ones, and you can use this method to update any third party libraries if they
 happen to need an update due to the re-render.
 
 Comparing to our hooks examples, `componentDidUpdate` can also be used in a
-similar way to `useEffect` to trigger side effects in response to changes to
-a component's state or props. Here's an example of two versions of a component
+similar way to `useEffect` to trigger side effects in response to changes to a
+component's state or props. Here's an example of two versions of a component
 with similar functionality to demonstrate:
 
 - **Function Component**
@@ -322,7 +320,7 @@ class Timer extends React.Component {
 }
 ```
 
-## Summary
+## Conclusion
 
 Imagine a big old oak tree. The tree could be a parent component, each of its
 branches a child component of the tree, each of its leaves a child component of
@@ -337,6 +335,8 @@ every need!
 
 ## Resources
 
-- [Component Lifecycle Methods](https://reactjs.org/docs/react-component.html#the-component-lifecycle)
+- [Component Lifecycle Methods][react component lifecycle]
 - [Component Lifecycle Diagram](https://projects.wojtekmaj.pl/react-lifecycle-methods-diagram/)
 - [Understanding the React Component Lifecycle](http://busypeoples.github.io/post/react-component-lifecycle/)
+
+[react component lifecycle]: https://reactjs.org/docs/react-component.html#the-component-lifecycle
