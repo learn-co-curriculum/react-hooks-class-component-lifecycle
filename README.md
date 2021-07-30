@@ -31,7 +31,7 @@ This means that every single thing you see in applications written in React is
 actually a React component and/or a part of one! For example, if you open a new
 chat window in a website written in React, a `ChatWindow` component is
 **created**. As you are interacting with it and sending messages to your friends
-&mdash; that's the **updating** part. And when you finally close the window, the
+— that's the **updating** part. And when you finally close the window, the
 React component gets **deleted**.
 
 It seems all pretty straightforward from the user's perspective, however as
@@ -45,7 +45,7 @@ access to certain built-in events in the React component lifecycle called
 component reacts (or doesn't react) to various changes in your app.
 
 These methods are called _lifecycle_ methods, because they are called at
-different times in the component's lifecycle &mdash; just before it's created,
+different times in the component's lifecycle — just before it's created,
 after it's created, and when it's about to be deleted.
 
 The only required method for a React class component to be valid is the
@@ -160,7 +160,7 @@ class ChatWindow extends React.Component {
 ## Updating
 
 Whenever a component's state or props are changed, it gets re-rendered on the
-page. That's the beauty of React components &mdash; they're quick to _react_ to
+page. That's the beauty of React components — they're quick to _react_ to
 changes. A re-render could be triggered when a user interacts with the
 component, or if new data (props or state) is passed in.
 
@@ -243,7 +243,7 @@ class ChatRoom extends React.Component {
 ```
 
 As you can see, in the example above there is some duplication of the logic in
-the `componentDidMount` and `componentDidUpdate` functions &mdash; this is one
+the `componentDidMount` and `componentDidUpdate` functions — this is one
 of the advantages of using `useEffect` instead.
 
 ## Unmounting
