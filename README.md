@@ -73,7 +73,7 @@ function called upon the initialization of a component.
 In older React code, you'll often encounter the `constructor` method when
 initializing state and binding methods, like this:
 
-```js
+```jsx
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -110,7 +110,7 @@ been rendered to the DOM. Here's a quick side-by-side:
 
 - **Function Component**:
 
-```js
+```jsx
 // 1. function is called
 function ChatWindow() {
   const [messages, setMessages] = useState([])
@@ -131,7 +131,7 @@ function ChatWindow() {
 
 - **Class Component**:
 
-```js
+```jsx
 class ChatWindow extends React.Component {
   // 1. constructor is callled (state is initialized)
   constructor(props) {
@@ -186,7 +186,7 @@ with similar functionality to demonstrate:
 
 - **Function Component**
 
-```js
+```jsx
 // 1. function is called
 // 4. function is called again after setting state in useEffect
 function ChatRoom() {
@@ -209,7 +209,7 @@ function ChatRoom() {
 
 - **Class Component**
 
-```js
+```jsx
 class ChatRoom extends React.Component {
   // 1. constructor is called
   // (using class field syntax, we don't need to write the constructor method)
@@ -267,7 +267,7 @@ But they are both used in similar cases. For example:
 
 - **Function Component**
 
-```js
+```jsx
 // 1. function is called
 // 4. function is called again after setting state
 function Timer() {
@@ -293,7 +293,7 @@ function Timer() {
 
 - **Class Component**
 
-```js
+```jsx
 class Timer extends React.Component {
   // 1. constructor is called
   state = { count: 0 };
